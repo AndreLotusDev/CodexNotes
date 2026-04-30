@@ -1,0 +1,21 @@
+.next
+node_modules
+data
+*.log
+browser-tests\.runtime
+browser-tests\artifacts
+playwright-report
+test-results
+coverage
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Misc local files
+.DS_Store
+Thumbs.db

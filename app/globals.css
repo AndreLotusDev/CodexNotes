@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4fbfa;
+  --surface: #ffffff;
+  --surface-muted: #ecf7f5;
+  --foreground: #163737;
+  --foreground-muted: #5f7f7b;
+  --border: #b8dcda;
+  --acc-1: #5fc7bb;
+  --acc-2: #2f9e95;
+  --acc-3: #1c6f69;
+  --danger: #b84d65;
+  --shadow: 0 18px 60px rgba(33, 94, 91, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background:
+    radial-gradient(circle at top, rgba(95, 199, 187, 0.18), transparent 35%),
+    linear-gradient(180deg, #f8fdfc 0%, #edf8f7 100%);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--foreground);
+  background: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.tiptap-editor .ProseMirror {
+  min-height: 420px;
+  padding: 1.1rem 1.2rem;
+  outline: none;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--foreground-muted);
+  pointer-events: none;
+}
+
+.prose-note {
+  color: var(--foreground);
+}
+
+.prose-note h1,
+.prose-note h2,
+.prose-note h3,
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3 {
+  margin: 1.4rem 0 0.8rem;
+  line-height: 1.2;
+}
+
+.prose-note p,
+.prose-note ul,
+.prose-note ol,
+.prose-note blockquote,
+.prose-note pre,
+.prose-note hr,
+.tiptap-editor p,
+.tiptap-editor ul,
+.tiptap-editor ol,
+.tiptap-editor blockquote,
+.tiptap-editor pre,
+.tiptap-editor hr {
+  margin: 0.8rem 0;
+}
+
+.prose-note ul,
+.prose-note ol,
+.tiptap-editor ul,
+.tiptap-editor ol {
+  padding-left: 1.4rem;
+}
+
+.prose-note a {
+  color: var(--acc-3);
+  text-decoration: underline;
+}
+
+.tiptap-editor a {
+  color: var(--acc-3);
+  text-decoration: underline;
+}
+
+.prose-note blockquote {
+  border-left: 3px solid var(--acc-1);
+  padding-left: 1rem;
+  color: var(--foreground-muted);
+}
+
+.tiptap-editor blockquote {
+  border-left: 3px solid var(--acc-1);
+  padding-left: 1rem;
+  color: var(--foreground-muted);
+}
+
+.prose-note pre,
+.prose-note code {
+  font-family: "Courier New", monospace;
+}
+
+.tiptap-editor pre,
+.tiptap-editor code {
+  font-family: "Courier New", monospace;
+}
+
+.prose-note pre {
+  overflow-x: auto;
+  border-radius: 1rem;
+  background: #e7f4f2;
+  padding: 1rem;
+}
+
+.tiptap-editor pre {
+  overflow-x: auto;
+  border-radius: 1rem;
+  background: #e7f4f2;
+  padding: 1rem;
+}
+
+.prose-note hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.tiptap-editor hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}

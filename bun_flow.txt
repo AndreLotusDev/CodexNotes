@@ -1,0 +1,8 @@
+bun add -d playwright
+bunx playwright install
+
+---
+
+bun install
+bun run test:browser:install
+bun run test:browser:ui

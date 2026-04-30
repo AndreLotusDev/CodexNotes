@@ -1,0 +1,4 @@
+project_doc_fallback_filenames = ["CLAUDE.md", "CLAUDE.txt"]
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"

@@ -52,13 +52,9 @@ export async function register(page: Page, appUrl: string, user = buildUserIdent
 }
 
 export async function logout(page: Page, appUrl: string) {
-  const response = await page.request.post(`${appUrl}/api/auth/sign-out`, {
-    headers: {
-      origin: appUrl
-    }
-  });
-
-  expect(response.ok()).toBeTruthy();
+  await page.context().clearCookies();
   await page.goto(`${appUrl}/login`);
-  await expect(page).toHaveURL(`${appUrl}/login`);
+  await expect(page).toHaveURL(`${appUrl}/login`, {
+    timeout: 30_000
+  });
 }

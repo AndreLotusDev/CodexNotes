@@ -8,11 +8,11 @@ test("share enable exposes a public path and updates the notes list badge", asyn
   const title = `Share enabled ${Date.now()}`;
   await createNote(page, appUrl, { title, body: "share me" });
 
-  await expect(page.getByText("Share")).toBeVisible();
-  await expect(page.getByText("Disabled")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Share" })).toBeVisible();
+  await expect(page.getByText("Disabled", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Enable share" }).click();
-  await expect(page.getByText("Enabled")).toBeVisible();
-  await expect(page.getByText("Sharing updated.")).toBeVisible();
+  await expect(page.getByText("Enabled", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Sharing updated." })).toBeVisible();
   await expect(page.locator("text=/\\/s\\/[A-Za-z0-9_-]+/")).toBeVisible();
 
   await page.goto(`${appUrl}/notes`);
@@ -67,12 +67,12 @@ test("share revoke removes the path, resets the list badge, and invalidates the 
   await expect(publicPage.getByRole("heading", { name: title })).toBeVisible();
 
   await page.getByRole("button", { name: "Disable share" }).click();
-  await expect(page.getByText("Disabled")).toBeVisible();
+  await expect(page.getByText("Disabled", { exact: true })).toBeVisible();
   await expect(page.locator("text=/\\/s\\/[A-Za-z0-9_-]+/")).toHaveCount(0);
 
   await page.goto(`${appUrl}/notes`);
   await expect(page.getByText(title)).toBeVisible();
-  await expect(page.getByText("Private")).toBeVisible();
+  await expect(page.getByText("Private", { exact: true })).toBeVisible();
 
   await publicPage.reload();
   await expect(publicPage.getByText("This page drifted out of reach.")).toBeVisible();

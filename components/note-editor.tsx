@@ -1,14 +1,13 @@
 "use client";
 
-import { MouseEvent, useEffect, useRef, useState, useTransition } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createNoteAction, deleteNoteAction, disableShareAction, enableShareAction, updateNoteAction } from "@/app/actions";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { useToast } from "@/components/toast-provider";
 import { Button, Input, Panel, Badge } from "@/components/ui";
 import { EMPTY_NOTE_DOC, isEmptyUntitledNote } from "@/lib/note-drafts";
 import { renderTipTapToSanitizedHtml } from "@/lib/tiptap";
-import { TipTapDoc } from "@/lib/types";
+import { ActionError, TipTapDoc } from "@/lib/types";
 
 type ExistingNote = {
   note: {
@@ -49,8 +48,9 @@ export function NoteEditor(props: Props) {
   const [shareEnabled, setShareEnabled] = useState(isCreateMode ? false : props.note.shareEnabled);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isSharePending, setIsSharePending] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const initialSerialized = JSON.stringify({ title: initialTitle, contentJson: initialContentJson });
   const lastSerialized = useRef(initialSerialized);
   const serialized = JSON.stringify({ title, contentJson });
@@ -71,23 +71,33 @@ export function NoteEditor(props: Props) {
 
     setStatus("saving");
     const timer = window.setTimeout(() => {
-      startTransition(async () => {
-        const result = await updateNoteAction({
-          id: noteId,
-          title,
-          contentJson
-        });
+      void (async () => {
+        const result = await requestJson<{ id: string; updatedAt: string; shareEnabled: boolean }>(
+          `/api/notes/${noteId}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({
+              title,
+              contentJson
+            })
+          }
+        );
 
         if ("error" in result) {
-          setStatus("error");
-          showToast(result.error.message, "error");
+          if (result.error.code !== "UNAUTHORIZED") {
+            setStatus("error");
+            showToast(result.error.message, "error");
+            return;
+          }
+
+          router.replace("/login");
           return;
         }
 
         lastSerialized.current = serialized;
         setStatus("saved");
         showToast("Note saved.");
-      });
+      })();
     }, 900);
 
     return () => window.clearTimeout(timer);
@@ -114,20 +124,31 @@ export function NoteEditor(props: Props) {
       return;
     }
 
-    startTransition(async () => {
-      const result = await createNoteAction({
-        title,
-        contentJson
+    setIsCreating(true);
+    void (async () => {
+      const result = await requestJson<{ noteId: string }>("/api/notes", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          contentJson
+        })
       });
 
       if ("error" in result) {
-        setStatus("error");
-        showToast(result.error.message, "error");
+        setIsCreating(false);
+
+        if (result.error.code !== "UNAUTHORIZED") {
+          setStatus("error");
+          showToast(result.error.message, "error");
+          return;
+        }
+
+        router.replace("/login");
         return;
       }
 
-      router.push(`/notes/${result.noteId}?toast=created`);
-    });
+      window.location.assign(`/notes/${result.noteId}?toast=created`);
+    })();
   }
 
   async function handleEnableShare() {
@@ -135,14 +156,24 @@ export function NoteEditor(props: Props) {
       return;
     }
 
-    const result = await enableShareAction({ id: noteId });
+    setIsSharePending(true);
+    const result = await requestJson<{ shareUrl: string; token: string; shareEnabled: true }>(`/api/notes/${noteId}/share`, {
+      method: "POST"
+    });
     if ("error" in result) {
+      if (result.error.code === "UNAUTHORIZED") {
+        router.replace("/login");
+        return;
+      }
+
+      setIsSharePending(false);
       setStatus("error");
       showToast(result.error.message, "error");
       return;
     }
     setShareEnabled(true);
     setShareUrl(result.shareUrl);
+    setIsSharePending(false);
     showToast("Sharing updated.");
   }
 
@@ -151,14 +182,24 @@ export function NoteEditor(props: Props) {
       return;
     }
 
-    const result = await disableShareAction({ id: noteId });
+    setIsSharePending(true);
+    const result = await requestJson<{ shareEnabled: false }>(`/api/notes/${noteId}/share`, {
+      method: "DELETE"
+    });
     if ("error" in result) {
+      if (result.error.code === "UNAUTHORIZED") {
+        router.replace("/login");
+        return;
+      }
+
+      setIsSharePending(false);
       setStatus("error");
       showToast(result.error.message, "error");
       return;
     }
     setShareEnabled(false);
     setShareUrl(null);
+    setIsSharePending(false);
     showToast("Sharing updated.");
   }
 
@@ -176,8 +217,15 @@ export function NoteEditor(props: Props) {
     }
 
     setIsDeleting(true);
-    const result = await deleteNoteAction({ id: noteId });
+    const result = await requestJson<{ success: true }>(`/api/notes/${noteId}`, {
+      method: "DELETE"
+    });
     if ("error" in result) {
+      if (result.error.code === "UNAUTHORIZED") {
+        router.replace("/login");
+        return;
+      }
+
       setIsDeleting(false);
       setStatus("error");
       showToast(result.error.message, "error");
@@ -185,7 +233,7 @@ export function NoteEditor(props: Props) {
     }
 
     setIsDeleteConfirmOpen(false);
-    window.location.href = "/notes?toast=deleted";
+    router.push("/notes?toast=deleted");
   }
 
   return (
@@ -193,8 +241,8 @@ export function NoteEditor(props: Props) {
       <Panel className="space-y-5">
         <div className="flex items-center justify-between gap-4">
           <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Untitled note" />
-          <Badge tone={statusTone(status, isPending, isCreateMode, canCreate)}>
-            {statusLabel(status, isPending, isCreateMode, canCreate)}
+          <Badge tone={statusTone(status, isCreating, isCreateMode, canCreate)}>
+            {statusLabel(status, isCreating, isCreateMode, canCreate)}
           </Badge>
         </div>
 
@@ -208,8 +256,8 @@ export function NoteEditor(props: Props) {
 
         {isCreateMode ? (
           <div className="flex justify-end">
-            <Button type="button" onClick={handleCreate} disabled={isPending || !canCreate}>
-              {isPending ? "Creating..." : "Create note"}
+            <Button type="button" onClick={handleCreate} disabled={isCreating || !canCreate}>
+              {isCreating ? "Creating..." : "Create note"}
             </Button>
           </div>
         ) : null}
@@ -240,12 +288,12 @@ export function NoteEditor(props: Props) {
             ) : null}
             <div className="flex gap-3">
               {shareEnabled ? (
-                <Button type="button" tone="ghost" onClick={handleDisableShare}>
-                  Disable share
+                <Button type="button" tone="ghost" onClick={handleDisableShare} disabled={isSharePending}>
+                  {isSharePending ? "Updating..." : "Disable share"}
                 </Button>
               ) : (
-                <Button type="button" onClick={handleEnableShare}>
-                  Enable share
+                <Button type="button" onClick={handleEnableShare} disabled={isSharePending}>
+                  {isSharePending ? "Updating..." : "Enable share"}
                 </Button>
               )}
             </div>
@@ -318,30 +366,42 @@ export function NoteEditor(props: Props) {
 
 function statusLabel(
   status: "idle" | "saving" | "saved" | "error",
-  pending: boolean,
+  isCreating: boolean,
   isCreateMode: boolean,
   canCreate: boolean
 ) {
   if (status === "error") return "Error";
   if (isCreateMode) {
-    if (pending) return "Creating...";
+    if (isCreating) return "Creating...";
     return canCreate ? "Ready" : "Unchanged";
   }
-  if (pending || status === "saving") return "Saving...";
+  if (status === "saving") return "Saving...";
   if (status === "saved") return "Saved";
   return "Ready";
 }
 
 function statusTone(
   status: "idle" | "saving" | "saved" | "error",
-  pending: boolean,
+  isCreating: boolean,
   isCreateMode: boolean,
   canCreate: boolean
 ): "neutral" | "success" | "danger" {
   if (status === "error") return "danger";
   if (isCreateMode) {
-    if (pending) return "neutral";
+    if (isCreating) return "neutral";
     return canCreate ? "success" : "neutral";
   }
   return status === "saved" ? "success" : "neutral";
+}
+
+async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T | { error: ActionError }> {
+  const response = await fetch(input, {
+    ...init,
+    headers: {
+      "content-type": "application/json",
+      ...(init?.headers ?? {})
+    }
+  });
+
+  return response.json() as Promise<T | { error: ActionError }>;
 }

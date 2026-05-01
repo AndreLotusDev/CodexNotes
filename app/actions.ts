@@ -119,8 +119,11 @@ export async function createNoteAction(input: { title?: string; contentJson: obj
     const note = sqliteDb.createNote(user.id, title, contentJson);
 
     revalidatePath("/notes");
-    return { noteId: note.id };
+    redirect(`/notes/${note.id}?toast=created`);
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     logServerError("createNoteAction", error);
     return appError("INTERNAL_ERROR");
   }
@@ -228,4 +231,8 @@ export async function disableShareAction(input: { id: string }) {
 
 export async function createNoteAndRedirectAction() {
   redirect("/notes/new");
+}
+
+function isRedirectError(error: unknown) {
+  return typeof error === "object" && error !== null && "digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT");
 }

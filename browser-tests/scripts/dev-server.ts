@@ -2,14 +2,18 @@ import { mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 
-const runtimeDir = path.join(process.cwd(), "browser-tests", ".runtime");
+const repoRoot = process.cwd();
+const runtimeDir = path.join(repoRoot, "browser-tests", ".runtime");
 const databasePath = path.join(runtimeDir, "tinynotes.playwright.sqlite");
+const nextCacheDir = path.join(repoRoot, ".next", "cache");
 const port = process.env.PLAYWRIGHT_PORT ?? "3001";
 const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 const bunBinary = process.env.BUN_BINARY ?? "bun";
+const nextDevArgs = process.argv.slice(2);
 
 mkdirSync(runtimeDir, { recursive: true });
 rmSync(databasePath, { force: true });
+rmSync(nextCacheDir, { force: true, recursive: true });
 
 const env = {
   ...process.env,
@@ -20,11 +24,15 @@ const env = {
 
 await runCommand([bunBinary, "run", "migrate"], env);
 
-const server = spawn(bunBinary, ["run", "--bun", "next", "dev", "-p", port, "-H", "127.0.0.1"], {
-  cwd: process.cwd(),
-  env,
-  stdio: "inherit"
-});
+const server = spawn(
+  bunBinary,
+  ["run", "--bun", "next", "dev", "--turbopack", "-p", port, "-H", "127.0.0.1", ...nextDevArgs],
+  {
+    cwd: repoRoot,
+    env,
+    stdio: "inherit"
+  }
+);
 
 server.on("exit", (code, signal) => {
   if (signal) {
@@ -44,7 +52,7 @@ for (const eventName of ["SIGINT", "SIGTERM"] as const) {
 async function runCommand(command: string[], childEnv: NodeJS.ProcessEnv) {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(command[0], command.slice(1), {
-      cwd: process.cwd(),
+      cwd: repoRoot,
       env: childEnv,
       stdio: "inherit"
     });

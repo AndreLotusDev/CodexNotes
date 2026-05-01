@@ -68,10 +68,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       <RouteToastListener onToast={showToast} />
       {children}
-      <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-3">
+      <div
+        aria-atomic="true"
+        aria-live="polite"
+        className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-3"
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
+            role={toast.tone === "error" ? "alert" : "status"}
             className={
               toast.tone === "error"
                 ? "rounded-2xl border border-[rgba(184,77,101,0.25)] bg-white px-4 py-3 text-sm text-[var(--danger)] shadow-[var(--shadow)]"

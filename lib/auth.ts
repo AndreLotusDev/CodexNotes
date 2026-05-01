@@ -70,15 +70,25 @@ export async function getAuthHeaders() {
   return new Headers(await headers());
 }
 
-const getCachedSession = cache(async () => {
+async function getSessionFromHeaders(requestHeaders: Headers) {
   return auth.api.getSession({
-    headers: await getAuthHeaders()
+    headers: requestHeaders
   });
+}
+
+const getCachedSession = cache(async () => {
+  return getSessionFromHeaders(await getAuthHeaders());
 });
 
 export async function getSessionUser() {
-  const session = await getCachedSession();
+  return mapSessionUser(await getCachedSession());
+}
 
+export async function getSessionUserFromHeaders(requestHeaders: Headers) {
+  return mapSessionUser(await getSessionFromHeaders(requestHeaders));
+}
+
+function mapSessionUser(session: Awaited<ReturnType<typeof getSessionFromHeaders>>) {
   if (!session?.user) {
     return null;
   }

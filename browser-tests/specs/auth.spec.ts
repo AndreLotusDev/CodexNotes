@@ -11,7 +11,7 @@ test("root redirect, login flow, and demo seed data work end to end", async ({ p
   await expect(page.getByText(DEMO_USER.password)).toBeVisible();
 
   await login(page, appUrl);
-  await expect(page.getByText("Welcome to TinyNotes")).toBeVisible();
+  await expect(page.locator("h2").filter({ hasText: /^Welcome to TinyNotes$/ }).first()).toBeVisible();
 
   await page.goto(`${appUrl}/`);
   await expect(page).toHaveURL(`${appUrl}/notes`);

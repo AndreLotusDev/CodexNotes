@@ -11,7 +11,9 @@ if (!bunBinary) {
   process.exit(1);
 }
 
-const child = spawn(bunBinary, ["run", "./browser-tests/scripts/dev-server.ts"], {
+const forwardedArgs = process.argv.slice(2);
+
+const child = spawn(bunBinary, ["run", "./browser-tests/scripts/dev-server.ts", ...forwardedArgs], {
   cwd: repoRoot,
   env: {
     ...process.env,

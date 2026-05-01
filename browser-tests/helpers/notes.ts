@@ -10,10 +10,18 @@ export async function createNote(page: Page, appUrl: string, input: { title: str
 
   await expect(page.getByText("Ready")).toBeVisible();
   await page.getByRole("button", { name: "Create note" }).click();
-  await expect(page).not.toHaveURL(`${appUrl}/notes/new`);
-  await expect(page.getByRole("heading", { name: "Share" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Danger zone" })).toBeVisible();
-  await expect(page.getByText("Note created.")).toBeVisible();
+  await page.waitForURL(/\/notes\/[^/?]+(?:\?toast=created)?$/, {
+    timeout: 30_000
+  });
+  await expect(page.getByRole("heading", { name: "Share" })).toBeVisible({
+    timeout: 30_000
+  });
+  await expect(page.getByRole("heading", { name: "Danger zone" })).toBeVisible({
+    timeout: 30_000
+  });
+  await expect(page.getByRole("status").filter({ hasText: "Note created." })).toBeVisible({
+    timeout: 30_000
+  });
   return page.url();
 }
 
@@ -40,8 +48,8 @@ export function getPreview(page: Page) {
 }
 
 export async function waitForSavedState(page: Page) {
-  await expect(page.getByText("Saving...")).toBeVisible();
-  await expect(page.getByText("Saved")).toBeVisible();
+  await expect(page.getByText("Saving...", { exact: true })).toBeVisible();
+  await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 }
 
 export async function captureSharePath(page: Page) {

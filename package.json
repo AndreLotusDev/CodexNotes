@@ -4,8 +4,8 @@
   "private": true,
   "packageManager": "bun@1.2.13",
   "scripts": {
-    "dev": "bun run --bun next dev",
-    "build": "bun run --bun next build",
+    "dev": "bun run --bun next dev --turbopack",
+    "build": "bun run --bun next build --turbopack",
     "start": "bun run --bun next start",
     "lint": "bun run --bun next lint",
     "typecheck": "bun run --bun tsc --noEmit",

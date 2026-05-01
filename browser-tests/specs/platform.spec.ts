@@ -30,7 +30,7 @@ test("note deletion confirmation works and removes both the note and any active 
   await openDeleteDialog(page);
   await page.getByRole("dialog").getByRole("button", { name: "Delete note" }).click();
   await expect(page).toHaveURL(new RegExp(`${appUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/notes(?:\\?toast=deleted)?$`));
-  await expect(page.getByText("Note deleted.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Note deleted." })).toBeVisible();
   await expect(page.getByText(title)).toHaveCount(0);
 
   await publicPage.reload();
@@ -43,18 +43,18 @@ test("toast notifications surface create, save, share, and delete outcomes", asy
 
   const title = `Toast note ${Date.now()}`;
   await createNote(page, appUrl, { title, body: "toast body" });
-  await expect(page.getByText("Note created.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Note created." })).toBeVisible();
 
   await page.getByPlaceholder("Untitled note").fill(`${title} saved`);
   await waitForSavedState(page);
-  await expect(page.getByText("Note saved.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Note saved." })).toBeVisible();
 
   await page.getByRole("button", { name: "Enable share" }).click();
-  await expect(page.getByText("Sharing updated.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Sharing updated." })).toBeVisible();
 
   await openDeleteDialog(page);
   await page.getByRole("dialog").getByRole("button", { name: "Delete note" }).click();
-  await expect(page.getByText("Note deleted.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Note deleted." })).toBeVisible();
 });
 
 test("loading states appear during delayed navigation to notes and shared note routes", async ({
@@ -72,7 +72,7 @@ test("loading states appear during delayed navigation to notes and shared note r
   }, { times: 1 });
   await page.getByRole("link", { name: "All notes" }).click();
   await expect(page.locator(".animate-pulse").first()).toBeVisible();
-  await expect(page.getByText("Welcome to TinyNotes")).toBeVisible();
+  await expect(page.locator("h2").filter({ hasText: /^Welcome to TinyNotes$/ }).first()).toBeVisible();
 
   await page.goto(`${appUrl}/notes/seed-demo-note`);
   await page.getByRole("button", { name: "Enable share" }).click();

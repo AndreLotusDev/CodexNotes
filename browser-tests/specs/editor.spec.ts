@@ -31,7 +31,7 @@ test("new note drafts stay local until ready and creation produces a persisted n
   await page.getByRole("button", { name: "Create note" }).click();
   await expect(page).not.toHaveURL(`${appUrl}/notes/new`);
   await expect(page.getByRole("heading", { name: "Share" })).toBeVisible();
-  await expect(page.getByText("Note created.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Note created." })).toBeVisible();
 
   await expect.poll(() => new URL(page.url()).searchParams.get("toast")).toBeNull();
   await page.reload();
@@ -54,7 +54,7 @@ test("editing notes autosaves changes and keeps the live preview in sync across 
   await expect(getPreview(page)).toContainText("and more live preview text");
 
   await waitForSavedState(page);
-  await expect(page.getByText("Note saved.")).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Note saved." })).toBeVisible();
 
   await page.reload();
   await expect(page.getByPlaceholder("Untitled note")).toHaveValue(updatedTitle);

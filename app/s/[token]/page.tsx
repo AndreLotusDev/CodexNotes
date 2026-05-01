@@ -14,6 +14,7 @@ export default async function SharedNotePage({ params }: { params: Promise<{ tok
     <Shell>
       <div className="mx-auto max-w-3xl">
         <Panel className="p-8">
+          <div className="h-1.5 w-24 animate-pulse rounded-full bg-[rgba(95,199,187,0.35)]" />
           <p className="text-sm uppercase tracking-[0.3em] text-[var(--foreground-muted)]">Shared note</p>
           <h1 className="mt-3 text-4xl font-semibold">{note.title || "Untitled note"}</h1>
           <p className="mt-3 text-sm text-[var(--foreground-muted)]">Updated {formatDate(note.updatedAt)}</p>

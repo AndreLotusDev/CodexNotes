@@ -2,6 +2,9 @@ import path from "node:path";
 import { mkdirSync } from "node:fs";
 import { test as base, expect } from "playwright/test";
 
+const browserTestsDir = path.resolve(__dirname, "..");
+const screenshotsDir = path.join(browserTestsDir, "artifacts", "screenshots");
+
 export const test = base.extend<{
   appUrl: string;
 }>({
@@ -11,7 +14,6 @@ export const test = base.extend<{
 });
 
 test.afterEach(async ({ page }, testInfo) => {
-  const screenshotsDir = path.join(process.cwd(), "browser-tests", "artifacts", "screenshots");
   mkdirSync(screenshotsDir, { recursive: true });
 
   const screenshotPath = path.join(
@@ -19,16 +21,20 @@ test.afterEach(async ({ page }, testInfo) => {
     `${sanitizeFileName(testInfo.titlePath.slice(1).join("__"))}--${testInfo.status}.png`
   );
 
-  await page.screenshot({
-    path: screenshotPath,
-    fullPage: true,
-    animations: "disabled"
-  });
+  try {
+    await page.screenshot({
+      path: screenshotPath,
+      fullPage: true,
+      animations: "disabled"
+    });
 
-  await testInfo.attach("evidence", {
-    path: screenshotPath,
-    contentType: "image/png"
-  });
+    await testInfo.attach("evidence", {
+      path: screenshotPath,
+      contentType: "image/png"
+    });
+  } catch {
+    // Ignore teardown screenshot failures so they do not mask the original test result.
+  }
 });
 
 function sanitizeFileName(value: string) {

@@ -33,6 +33,7 @@ type Props = {
 export function RichTextEditor({ content, onChange, placeholder = "Start writing..." }: Props) {
   const editor = useEditor({
     immediatelyRender: false,
+    shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -172,11 +173,11 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
   }
 
   function handleToggleBlockquote() {
-    currentEditor.chain().focus().toggleBlockquote().run();
+    currentEditor.chain().focus().clearNodes().toggleBlockquote().run();
   }
 
   function handleToggleCodeBlock() {
-    currentEditor.chain().focus().toggleCodeBlock().run();
+    currentEditor.chain().focus().clearNodes().toggleCodeBlock().run();
   }
 
   function handleInsertLink() {

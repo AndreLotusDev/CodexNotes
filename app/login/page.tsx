@@ -13,7 +13,7 @@ export default async function LoginPage() {
     <Shell>
       <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <section className="space-y-6">
-          <p className="text-sm uppercase tracking-[0.4em] text-[var(--foreground-muted)]">Elegant acqua colors</p>
+          <p className="text-sm uppercase tracking-[0.4em] text-[var(--foreground-muted)]">Minimal black interface</p>
           <h1 className="max-w-xl text-5xl font-semibold leading-tight">
             Notes with a calm surface and proper user ownership underneath.
           </h1>

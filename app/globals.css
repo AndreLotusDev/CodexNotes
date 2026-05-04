@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4fbfa;
-  --surface: #ffffff;
-  --surface-muted: #ecf7f5;
-  --foreground: #163737;
-  --foreground-muted: #5f7f7b;
-  --border: #b8dcda;
-  --acc-1: #5fc7bb;
-  --acc-2: #2f9e95;
-  --acc-3: #1c6f69;
-  --danger: #b84d65;
-  --shadow: 0 18px 60px rgba(33, 94, 91, 0.12);
+  --background: #050505;
+  --surface: #0b0b0b;
+  --surface-muted: #121212;
+  --foreground: #fafafa;
+  --foreground-muted: #a1a1aa;
+  --border: #27272a;
+  --acc-1: #14b8a6;
+  --acc-2: #0f766e;
+  --acc-3: #5eead4;
+  --danger: #fb7185;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -20,8 +20,10 @@
 
 html {
   background:
-    radial-gradient(circle at top, rgba(95, 199, 187, 0.18), transparent 35%),
-    linear-gradient(180deg, #f8fdfc 0%, #edf8f7 100%);
+    radial-gradient(circle at top, rgba(20, 184, 166, 0.15), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.12), transparent 30%),
+    linear-gradient(180deg, #020202 0%, #090909 100%);
+  color-scheme: dark;
 }
 
 body {
@@ -29,7 +31,7 @@ body {
   min-height: 100vh;
   color: var(--foreground);
   background: transparent;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 a {
@@ -117,25 +119,25 @@ textarea {
 
 .prose-note pre,
 .prose-note code {
-  font-family: "Courier New", monospace;
+  font-family: var(--font-mono), "Courier New", monospace;
 }
 
 .tiptap-editor pre,
 .tiptap-editor code {
-  font-family: "Courier New", monospace;
+  font-family: var(--font-mono), "Courier New", monospace;
 }
 
 .prose-note pre {
   overflow-x: auto;
   border-radius: 1rem;
-  background: #e7f4f2;
+  background: #101314;
   padding: 1rem;
 }
 
 .tiptap-editor pre {
   overflow-x: auto;
   border-radius: 1rem;
-  background: #e7f4f2;
+  background: #101314;
   padding: 1rem;
 }
 

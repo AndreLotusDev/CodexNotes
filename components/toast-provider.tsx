@@ -79,8 +79,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             role={toast.tone === "error" ? "alert" : "status"}
             className={
               toast.tone === "error"
-                ? "rounded-2xl border border-[rgba(184,77,101,0.25)] bg-white px-4 py-3 text-sm text-[var(--danger)] shadow-[var(--shadow)]"
-                : "rounded-2xl border border-[rgba(47,158,149,0.22)] bg-white px-4 py-3 text-sm text-[var(--acc-3)] shadow-[var(--shadow)]"
+                ? "rounded-2xl border border-[rgba(251,113,133,0.25)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--danger)] shadow-[var(--shadow)]"
+                : "rounded-2xl border border-[rgba(20,184,166,0.22)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--acc-3)] shadow-[var(--shadow)]"
             }
           >
             {toast.message}
